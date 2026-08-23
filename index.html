@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>One Brain Cell Challenge</title>
+  <style>
+    :root {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #1f2937;
+      background: #f7f7fb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: grid;
+      place-items: center;
+      padding: 16px;
+      background: linear-gradient(180deg, #fff 0%, #f5f5fa 100%);
+    }
+    .game {
+      position: relative;
+      width: min(760px, 100%);
+      min-height: min(720px, calc(100dvh - 32px));
+      overflow: hidden;
+      border: 1px solid #e5e7eb;
+      border-radius: 28px;
+      background: #fff;
+      padding: 34px 24px;
+    }
+    .question {
+      max-width: 620px;
+      margin: 24px auto 0;
+      text-align: center;
+      font-size: clamp(28px, 6vw, 44px);
+      line-height: 1.12;
+      font-weight: 750;
+    }
+    .hint {
+      text-align: center;
+      margin-top: 14px;
+      color: #6b7280;
+      font-size: 16px;
+    }
+    button {
+      border: 0;
+      border-radius: 18px;
+      min-width: 112px;
+      min-height: 60px;
+      padding: 16px 28px;
+      font: inherit;
+      font-size: 20px;
+      font-weight: 700;
+      cursor: pointer;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #yes {
+      position: absolute;
+      left: calc(50% - 128px);
+      top: 52%;
+      background: #2563eb;
+      color: white;
+      transition: left 120ms ease, top 120ms ease;
+    }
+    #no {
+      position: absolute;
+      left: calc(50% + 16px);
+      top: 52%;
+      background: #111827;
+      color: white;
+    }
+    .result {
+      display: none;
+      position: absolute;
+      inset: 0;
+      padding: 24px;
+      background: white;
+      text-align: center;
+      align-content: center;
+    }
+    .result.show { display: grid; }
+    .result h2 {
+      margin: 0 0 20px;
+      font-size: clamp(34px, 9vw, 58px);
+    }
+    .result img {
+      width: min(520px, 100%);
+      max-height: 62dvh;
+      object-fit: contain;
+      margin: 0 auto;
+      border-radius: 24px;
+    }
+    @media (max-width: 480px) {
+      .game { min-height: calc(100dvh - 24px); padding: 24px 16px; }
+      #yes { left: calc(50% - 118px); }
+      #no { left: calc(50% + 10px); }
+    }
+  </style>
+</head>
+<body>
+  <main class="game" id="game">
+    <h1 class="question">Do you think my one brain cell can handle an audio that long?</h1>
+    <p class="hint" id="hint" aria-live="polite">Choose wisely 😌</p>
+
+    <button id="yes" type="button">Yes</button>
+    <button id="no" type="button">No</button>
+
+    <section class="result" id="result" aria-live="polite">
+      <h2>Correct answer ✅</h2>
+      <img src="cat.jpg" alt="Funny cat reaction" />
+    </section>
+  </main>
+
+  <script>
+    const game = document.getElementById('game');
+    const yes = document.getElementById('yes');
+    const no = document.getElementById('no');
+    const hint = document.getElementById('hint');
+    const result = document.getElementById('result');
+
+    let escapes = 0;
+
+    function moveYes() {
+      const box = game.getBoundingClientRect();
+      const btn = yes.getBoundingClientRect();
+      const padding = 12;
+      const safeTop = Math.min(210, box.height * 0.36);
+      const maxX = Math.max(padding, box.width - btn.width - padding);
+      const maxY = Math.max(safeTop, box.height - btn.height - padding);
+
+      let x = padding + Math.random() * Math.max(0, maxX - padding);
+      let y = safeTop + Math.random() * Math.max(0, maxY - safeTop);
+
+      const noBox = no.getBoundingClientRect();
+      const noLeft = noBox.left - box.left - 18;
+      const noRight = noBox.right - box.left + 18;
+      const noTop = noBox.top - box.top - 18;
+      const noBottom = noBox.bottom - box.top + 18;
+
+      if (x + btn.width > noLeft && x < noRight && y + btn.height > noTop && y < noBottom) {
+        x = x < box.width / 2 ? padding : Math.max(padding, maxX);
+        y = Math.min(maxY, y + 90);
+      }
+
+      yes.style.left = `${x}px`;
+      yes.style.top = `${y}px`;
+
+      escapes += 1;
+      const messages = ['Almost 😏', 'Nope 😂', 'Too slow!', 'Try again 👀', 'One brain cell says no.'];
+      hint.textContent = messages[(escapes - 1) % messages.length];
+    }
+
+    yes.addEventListener('pointerdown', (event) => {
+      event.preventDefault();
+      moveYes();
+    });
+
+    yes.addEventListener('mouseenter', () => {
+      if (window.matchMedia('(hover: hover)').matches) moveYes();
+    });
+
+    no.addEventListener('click', () => {
+      result.classList.add('show');
+      yes.hidden = true;
+      no.hidden = true;
+    });
+  </script>
+</body>
+</html>
