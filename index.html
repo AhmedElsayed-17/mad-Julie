@@ -5,99 +5,142 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Soulmate Question</title>
   <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
-      margin: 0;
-      background-color: #ffe6e9;
-      font-family: Arial, sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #ffe6eb 0%, #ffd1dc 100%);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 20px;
     }
 
     .main-frame {
       background: #ffffff;
-      padding: 30px;
-      border-radius: 15px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      padding: 35px 30px;
+      border-radius: 24px;
+      box-shadow: 0 12px 35px rgba(255, 77, 109, 0.15);
       text-align: center;
-      max-width: 500px;
-      width: 90%;
+      max-width: 480px;
+      width: 100%;
       position: relative;
+    }
+
+    /* Question and Disclaimer set to the exact same font size */
+    .question, .disclaimer {
+      font-size: 20px;
+      line-height: 1.5;
     }
 
     .question {
-      font-size: 22px;
-      font-weight: bold;
-      color: #333333;
+      font-weight: 700;
+      color: #2b2b2b;
       margin-bottom: 25px;
     }
 
-    /* Picture is hidden initially */
-    .cat-img {
-      width: 180px;
-      height: auto;
-      border-radius: 10px;
-      margin-top: 15px;
-      margin-bottom: 20px;
-      display: none;
-    }
-
-    .btn-container {
+    .btn-area {
+      position: relative;
       display: flex;
       justify-content: center;
-      gap: 20px;
-      margin-bottom: 25px;
-      position: relative;
-      min-height: 50px;
+      align-items: center;
+      gap: 30px;
+      min-height: 70px;
+      margin-bottom: 20px;
     }
 
-    button {
-      padding: 10px 25px;
+    .btn {
+      padding: 12px 32px;
       font-size: 18px;
-      font-weight: bold;
+      font-weight: 700;
       border: none;
-      border-radius: 8px;
+      border-radius: 50px;
       cursor: pointer;
-      transition: transform 0.1s ease;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      transition: background-color 0.2s, transform 0.1s;
     }
 
     #yes-btn {
       background-color: #ff4d6d;
-      color: white;
+      color: #ffffff;
+      z-index: 2;
+    }
+
+    #yes-btn:hover {
+      background-color: #ff2a55;
+      transform: scale(1.05);
     }
 
     #no-btn {
       background-color: #6c757d;
-      color: white;
+      color: #ffffff;
       position: absolute;
+      right: 20%;
+      z-index: 10;
+    }
+
+    /* Revealed cat image section */
+    .picture-section {
+      display: none;
+      margin-top: 15px;
+      margin-bottom: 20px;
+      animation: fadeIn 0.4s ease-in-out forwards;
+    }
+
+    .picture-section img {
+      max-width: 220px;
+      width: 100%;
+      height: auto;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    }
+
+    .picture-section .success-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #ff4d6d;
+      margin-top: 12px;
     }
 
     .disclaimer {
-      font-size: 22px;
       color: #666666;
+      border-top: 2px dashed #f0f0f0;
+      padding-top: 20px;
       margin-top: 20px;
-      border-top: 1px solid #eee;
-      padding-top: 15px;
-      line-height: 1.4;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
 <body>
 
   <div class="main-frame">
+    <!-- Main Question -->
     <div class="question">
       Your serious thinking time is over. Do you admit that HerBolBol is the best soulmate you have ever met?
     </div>
 
-    <div class="btn-container">
-      <button id="yes-btn" onclick="showImage()">Yes</button>
-      <button id="no-btn">No</button>
+    <!-- Buttons Container -->
+    <div class="btn-area" id="button-container">
+      <button id="yes-btn" class="btn" onclick="handleYesClick()">Yes</button>
+      <button id="no-btn" class="btn">No</button>
     </div>
 
-    <!-- Image reveals when Yes is pressed -->
-    <img id="cat-image" src="cat.jpg" alt="Cute Cat" class="cat-img">
+    <!-- Hidden Picture (Revealed after clicking YES) -->
+    <div class="picture-section" id="picture-section">
+      <img src="cat.jpg" alt="Cute Cat">
+      <div class="success-title">I knew it! ❤️</div>
+    </div>
 
+    <!-- Bottom Disclaimer (Same font size as Question) -->
     <div class="disclaimer">
       Disclaimer: If you are still mad at my goofy personality, this message was sent by my neighbor's cockroaches—they hacked my system.
     </div>
@@ -105,30 +148,30 @@
 
   <script>
     const noBtn = document.getElementById('no-btn');
-    const container = document.querySelector('.btn-container');
-    const catImage = document.getElementById('cat-image');
+    const btnArea = document.getElementById('button-container');
+    const pictureSection = document.getElementById('picture-section');
 
-    // Reveal image on clicking YES
-    function showImage() {
-      catImage.style.display = 'inline-block';
-    }
-
-    // Make the NO button move randomly on hover/touch
-    noBtn.addEventListener('mouseover', moveButton);
-    noBtn.addEventListener('touchstart', moveButton);
-
-    function moveButton() {
-      const containerRect = container.getBoundingClientRect();
+    // Relocate NO button randomly when hovered or touched
+    function escapeNoButton() {
+      const areaRect = btnArea.getBoundingClientRect();
       const btnRect = noBtn.getBoundingClientRect();
 
-      const maxX = containerRect.width - btnRect.width;
-      const maxY = 150;
+      const maxX = areaRect.width - btnRect.width;
+      const maxY = areaRect.height - btnRect.height;
 
-      const randomX = Math.floor(Math.random() * maxX);
-      const randomY = Math.floor(Math.random() * maxY) - 50;
+      const randomX = Math.max(0, Math.floor(Math.random() * maxX));
+      const randomY = Math.max(0, Math.floor(Math.random() * maxY));
 
-      noBtn.style.left = `${randomX}px`;
-      noBtn.style.top = `${randomY}px`;
+      noBtn.style.left = randomX + 'px';
+      noBtn.style.top = randomY + 'px';
+    }
+
+    noBtn.addEventListener('mouseover', escapeNoButton);
+    noBtn.addEventListener('touchstart', escapeNoButton);
+
+    // Show image on YES click
+    function handleYesClick() {
+      pictureSection.style.display = 'block';
     }
   </script>
 
